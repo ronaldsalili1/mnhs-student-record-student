@@ -8,14 +8,15 @@ import { AuthContext } from '../../providers/AuthProvider';
 import { post } from '../../helpers/request';
 import { removeAuthenticated } from '../../helpers/localStorage';
 import { NavigationContext } from '../../providers/NavigationProvider';
+import mnhsLogo from '../../images/mnhs-logo.webp';
 
 const { Header } = Layout;
 const { Title, Text } = Typography;
 
 const NavigationHeader = () => {
     const { token } = theme.useToken();
-    const { teacher } = useContext(AuthContext);
-    const { first_name, last_name, email } = teacher || {};
+    const { student } = useContext(AuthContext);
+    const { first_name, last_name, email } = student || {};
     const navigate = useNavigate();
     const location = useLocation();
     const layoutState = useContext(NavigationContext);
@@ -63,7 +64,7 @@ const NavigationHeader = () => {
                 position: 'fixed',
                 top: 0,
                 right: 0,
-                left: 300,
+                left: 0,
                 height: 64,
                 zIndex: 10,
             }}
@@ -73,13 +74,23 @@ const NavigationHeader = () => {
                 align="center"
                 style={{ height: '100%' }}
             >
-                <Title
-                    className="header-title"
-                    level={1}
-                    style={{ fontSize: 20, color: token.colorNeutral }}
+                <Flex
+                    gap={8}
+                    align="center"
                 >
-                    MNHS Student Records
-                </Title>
+                    <img
+                        src={mnhsLogo}
+                        alt="MNHS Logo"
+                        style={{ height: 40 }}
+                    />
+                    <Title
+                        className="header-title"
+                        level={1}
+                        style={{ fontSize: 20, color: token.colorNeutral }}
+                    >
+                        MNHS Student Records
+                    </Title>
+                </Flex>
                 <div>
                     <Popover
                         placement="bottomRight"
@@ -115,7 +126,7 @@ const NavigationHeader = () => {
                             <Col>
                                 {avatar}
                             </Col>
-                            <Col className="teacher-name">
+                            <Col className="student-name">
                                 {first_name} {last_name}
                             </Col>
                             <Col>

@@ -6,7 +6,7 @@ import { get } from '../helpers/request';
 const useAuth = () => {
     const [checkingAuthStatus, setCheckingAuthStatus] = useState(false);
     const [meta, setMeta] = useState(null);
-    const [teacher, setTeacher] = useState(null);
+    const [student, setStudent] = useState(null);
     const [activeSemester, setActiveSemester] = useState(null);
 
     const navigate = useNavigate();
@@ -25,7 +25,7 @@ const useAuth = () => {
             return;
         }
 
-        setTeacher(response?.data?.teacher);
+        setStudent(response?.data?.student);
         setActiveSemester(response?.data?.semester);
         setCheckingAuthStatus(false);
     };
@@ -33,8 +33,8 @@ const useAuth = () => {
     return {
         checkingAuthStatus,
         meta,
-        teacher,
-        setTeacher,
+        student,
+        setStudent,
         resetMeta,
         checkAuthStatus,
         activeSemester,

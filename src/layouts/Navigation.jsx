@@ -33,7 +33,7 @@ const Navigation = () => {
                         <Content
                             className="nav-content"
                             style={{
-                                padding: '15px 15px 0px 315px',
+                                padding: '15px 15px 0px',
                                 marginTop: 64,
                             }}
                         >
@@ -43,7 +43,7 @@ const Navigation = () => {
                         </Content>
                         <Footer
                             className="nav-content"
-                            style={{ textAlign: 'center', padding: '10px 0px 0px 300px' }}
+                            style={{ textAlign: 'center', padding: '10px 0px 0px' }}
                         >
                             © 2024 Mayorga National High School. All rights reserved.
                         </Footer>

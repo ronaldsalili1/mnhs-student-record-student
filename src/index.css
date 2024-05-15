@@ -26,8 +26,6 @@ body {
 }
 
 @media screen and (max-width: 991.99px) {
-    .nav-content {
-        padding-left: 95px !important;
-    }
+    
 }
 

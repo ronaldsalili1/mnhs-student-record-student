@@ -10,6 +10,7 @@ import Basic from './layouts/Basic';
 import Navigation from './layouts/Navigation';
 
 import LoginPage from './containers/LoginPage/LoginPage';
+import GradePage from './containers/GradePage/GradePage';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -24,8 +25,12 @@ const router = createBrowserRouter(
                     element={<LoginPage/>}
                 />
             </Route>
-            {/* <Route element={<Navigation/>}>
-            </Route> */}
+            <Route element={<Navigation/>}>
+                <Route
+                    path="grades"
+                    element={<GradePage/>}
+                />
+            </Route>
         </Route>,
     ),
     {

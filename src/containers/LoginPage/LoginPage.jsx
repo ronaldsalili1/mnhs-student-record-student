@@ -1,14 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Input, Flex, theme, Typography, Button, Alert } from 'antd';
 
 import backgroundImg from '../../images/mnhs-bg.webp';
 import mnhsLogo from '../../images/mnhs-logo.webp';
 import { post } from '../../helpers/request';
-import { setAuthenticated } from '../../helpers/localStorage';
 import { getParamsFromUrl } from '../../helpers/general';
-
-import ResetPasswordModal from './components/ResetPasswordModal';
+import { getAuthenticated, setAuthenticated } from '../../helpers/localStorage';
 
 const { Text, Link } = Typography;
 
@@ -19,44 +17,49 @@ const LoginPage = () => {
 
     const [meta, setMeta] = useState(null);
     const [loadingSubmit, setLoadingSubmit] = useState(false);
-    const [loadingResetPassReq, setLoadingResetPassReq] = useState(false);
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [modal, setModal] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
+    const [loadingOtpResend, setLoadingOtpResend] = useState(false);
 
-    const requestResetPassword = async ({ fields }) => {
-        setLoadingResetPassReq(true);
-
+    const requestOtp = async (resend) => {
+        !resend && setLoadingSubmit(true);
+        resend && setLoadingOtpResend(true);
+    
         const body = {
-            ...fields,
+            email,
+            resend,
         };
-
+    
         const response = await post({
-            uri: '/student/auth/reset-password/request',
+            uri: '/student/auth/request-otp',
             body,
             navigate,
             location,
         });
-
+    
         if (response?.meta?.code !== 200) {
             setMeta(response?.meta);
-            setLoadingResetPassReq(false);
+            setLoadingSubmit(false);
+            setLoadingOtpResend(false);
             return;
         }
-
-        setMeta({
-            ...response?.meta,
-            message: 'A password reset has been successfully sent. Please check your email.',
-        });
-        setLoadingResetPassReq(false);
-    };
     
-    const login = async () => {
+        setMeta({
+            code: 200,
+            message: 'An OTP has been sent to your email.',
+        });
+        setTimeout(() => setMeta(null), 3000);
+        setLoadingSubmit(false);
+        setLoadingOtpResend(false);
+        setOtpSent(true);
+    };
+
+    const login = async (otp) => {
         setLoadingSubmit(true);
     
         const body = {
             email,
-            password,
+            otp,
         };
     
         const response = await post({
@@ -69,10 +72,10 @@ const LoginPage = () => {
         if (response?.meta?.code !== 200) {
             setMeta(response?.meta);
             setLoadingSubmit(false);
+            setTimeout(() => setMeta(null), 3000);
             return;
         }
     
-       
         setLoadingSubmit(false);
         setAuthenticated();
 
@@ -82,9 +85,21 @@ const LoginPage = () => {
             return;
         }
 
-        navigate('/subjects', { replace: true });
+        navigate('/grades', { replace: true });
     };
 
+    useEffect(() => {
+        const authenticated = getAuthenticated();
+        if (authenticated === 'yes') {
+            const query = getParamsFromUrl();
+            if (query.path) {
+                navigate(query.path, { replace: true });
+            } else {
+                navigate('/grades');
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <Flex
@@ -145,45 +160,41 @@ const LoginPage = () => {
                         MNHS Student Record System
                     </Text>
                 </Flex>
-                <div>
-                    <Text strong>Email:</Text>
-                    <Input
+                {
+                    otpSent ?
+                        <div>
+                            <Text>Please provide the one-time password (OTP) that was sent to your email.</Text> <br/><br/>
+                            <Flex justify="center">
+                                <Input.OTP
+                                    length={6}
+                                    size="large"
+                                    onChange={value => login(value)}
+                                />
+                            </Flex>
+                            <br/><Text>Did not receive code?</Text> <Link onClick={() => requestOtp(true)}>{loadingOtpResend ? 'Sending...' : 'Send again'}</Link>
+                        </div>
+                        : <div>
+                            <Text strong>Email:</Text>
+                            <Input
+                                size="large"
+                                onChange={e => setEmail(e.target.value)}
+                            />
+                        </div>
+                }
+                {
+                    !otpSent &&
+                    <Button
+                        disabled={!email || email === ''}
+                        loading={loadingSubmit}
+                        type="primary"
                         size="large"
-                        onChange={e => setEmail(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <Text strong>Password:</Text>
-                    <Input.Password
-                        size="large"
-                        onChange={e => setPassword(e.target.value)}
-                    />
-                </div>
-                <Flex gap={5}>
-                    <Text>Forgot your password?</Text>
-                    <Link onClick={() => setModal(true)}>Reset Password</Link>
-                </Flex>
-                <Button
-                    disabled={!email || email === '' || !password || password === ''}
-                    loading={loadingSubmit}
-                    type="primary"
-                    size="large"
-                    style={{ marginTop: 20 }}
-                    onClick={login}
-                >
-                    Login
-                </Button>
+                        style={{ marginTop: 20 }}
+                        onClick={() => requestOtp(false)}
+                    >
+                        Login
+                    </Button>
+                }
             </Flex>
-            <ResetPasswordModal
-                open={modal}
-                title="Reset Password"
-                destroyOnClose={true}
-                width={450}
-                onCancel={() => setModal(false)}
-                loadingResetPassReq={loadingResetPassReq}
-                requestResetPassword={requestResetPassword}
-                setModal={setModal}
-            />
         </Flex>
     );
 };
